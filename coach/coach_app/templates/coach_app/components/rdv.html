@@ -16,32 +16,33 @@
   {% endif %}
 
   <!-- Étape 1 : Choix de l'exercice -->
-  <form method="get" action="" class="mb-6">
-    <div class="mb-4">
-      <label for="exercice" class="block text-sm font-medium text-gray-700 mb-2">Choisissez votre exercice :</label>
-      <select name="exercice" id="exercice" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" onchange="this.form.submit()">
-        <option value="">-- Sélectionnez un exercice --</option>
-        {% for exercice in exercices %}
-          <option value="{{ exercice.id }}" {% if exercice_selectionne and exercice_selectionne.id == exercice.id %}selected{% endif %}>
-            {{ exercice.nom }} - {{ exercice.duree }} - {{ exercice.tarif }}€
-          </option>
-        {% endfor %}
-      </select>
-    </div>
-    {% if exercice_selectionne %}
-      <input type="hidden" name="mois" value="{{ month }}">
-      <input type="hidden" name="annee" value="{{ year }}">
-    {% endif %}
-  </form>
+  <div class="mb-6">
+    <form method="get" action="{% url 'coach:rendez_vous' %}">
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Choisissez votre exercice :</label>
+        <select name="exercice" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500" required>
+          <option value="">-- Sélectionnez un exercice --</option>
+          {% for exercice in exercices %}
+            <option value="{{ exercice.id }}" {% if exercice_selectionne and exercice_selectionne.id == exercice.id %}selected{% endif %}>
+              {{ exercice.nom }} - {{ exercice.duree }} - {{ exercice.tarif }}€
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="bg-black text-white border border-black px-6 py-2 rounded hover:bg-gray-800 font-medium">
+        Continuer
+      </button>
+    </form>
+  </div>
 
   {% if exercice_selectionne %}
     <!-- Étape 2 : Sélection de la date -->
     <div class="flex justify-between items-center mb-6">
-      <a href="?exercice={{ exercice_selectionne.id }}&mois={{ mois_precedent.mois }}&annee={{ mois_precedent.annee }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm">
+      <a href="?exercice={{ exercice_selectionne.id }}&mois={{ mois_precedent.mois }}&annee={{ mois_precedent.annee }}{% if mode_modification and rdv_id %}&rdv_id={{ rdv_id }}&modifier=true{% endif %}{% if date_selectionnee %}&date={{ date_selectionnee }}{% endif %}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm">
         {{ mois_precedent.nom }}
       </a>
       <span class="text-lg font-semibold text-gray-800">{{ mois_actuel }}</span>
-      <a href="?exercice={{ exercice_selectionne.id }}&mois={{ mois_suivant.mois }}&annee={{ mois_suivant.annee }}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm">
+      <a href="?exercice={{ exercice_selectionne.id }}&mois={{ mois_suivant.mois }}&annee={{ mois_suivant.annee }}{% if mode_modification and rdv_id %}&rdv_id={{ rdv_id }}&modifier=true{% endif %}{% if date_selectionnee %}&date={{ date_selectionnee }}{% endif %}" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm">
         {{ mois_suivant.nom }}
       </a>
     </div>
@@ -61,7 +62,7 @@
         {% if jour.disable %}
           <button class="py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded cursor-not-allowed" disabled>{{ jour.numero }}</button>
         {% else %}
-          <a href="?exercice={{ exercice_selectionne.id }}&mois={{ month }}&annee={{ year }}&date={{ jour.date|date:'Y-m-d' }}" class="block py-2 border border-gray-300 bg-white text-gray-800 rounded hover:bg-gray-100">
+          <a href="?exercice={{ exercice_selectionne.id }}&mois={{ month }}&annee={{ year }}&date={{ jour.date|date:'Y-m-d' }}{% if mode_modification and rdv_id %}&rdv_id={{ rdv_id }}&modifier=true{% endif %}" class="block py-2 border border-gray-300 bg-white text-gray-800 rounded hover:bg-gray-100">
             {{ jour.numero }}
           </a>
         {% endif %}
@@ -70,301 +71,170 @@
 
     {% if date_selectionnee %}
       <div class="mt-8">
-        <p class="text-center font-medium text-gray-700 mb-2">Cliquez pour ajouter/retirer un créneau</p>
-        <div class="grid grid-cols-4 gap-2">
-          {% for h in heures_disponibles %}
-            {% if date_selectionnee == today|stringformat:"Y-m-d" and h < heure_limite %}
-              <button class="py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded cursor-not-allowed" disabled>{{ h }}</button>
-            {% elif h in creneaux_reserves %}
-              <button class="py-2 border border-gray-300 bg-gray-200 text-gray-600 rounded cursor-not-allowed font-medium" disabled>
-                {{ h }}
-                <div class="text-xs text-gray-500 mt-1">Réservé</div>
-              </button>
-            {% else %}
-              <button 
-                id="creneau-{{ h }}"
-                onclick="toggleCreneau('{{ exercice_selectionne.id }}', '{{ date_selectionnee }}', '{{ h }}')"
-                class="py-2 border border-gray-300 bg-white text-black rounded hover:bg-gray-100 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                {{ h }}
-              </button>
-            {% endif %}
-          {% endfor %}
-        </div>
+        <p class="text-center font-medium text-gray-700 mb-4">
+          {% if mode_modification %}
+            Sélectionnez le nouveau créneau pour votre rendez-vous
+          {% else %}
+            Sélectionnez un ou plusieurs créneaux
+          {% endif %}
+        </p>
+        
+        {% if mode_modification %}
+          <!-- Formulaire de modification -->
+          <form method="post" action="{% url 'coach:ajouter_creneau' %}">
+            {% csrf_token %}
+            <input type="hidden" name="exercice_id" value="{{ exercice_selectionne.id }}">
+            <input type="hidden" name="date" value="{{ date_selectionnee }}">
+            <input type="hidden" name="rdv_id" value="{{ rdv_id }}">
+            
+            <div class="grid grid-cols-4 gap-2 mb-6">
+                          {% for h in heures_disponibles %}
+              {% if date_selectionnee == today|stringformat:"Y-m-d" and h < heure_limite %}
+                <button type="button" class="w-full py-3 min-h-[60px] border border-gray-200 bg-gray-100 text-gray-400 rounded cursor-not-allowed" disabled>{{ h }}</button>
+              {% elif h in creneaux_reserves %}
+                <button type="button" class="w-full py-3 min-h-[60px] border border-gray-300 bg-gray-200 text-gray-600 rounded cursor-not-allowed font-medium" disabled>
+                  {{ h }}
+                  <div class="text-xs text-gray-500 mt-1">Réservé</div>
+                </button>
+                {% elif h in heures_selectionnees %}
+                  <!-- Créneau déjà sélectionné : fond noir, texte blanc, permet de supprimer -->
+                  <form method="post" action="{% url 'coach:supprimer_creneau' %}">
+                    {% csrf_token %}
+                    {% for rdv_temp in rdv_temp_date %}
+                      {% if rdv_temp.heure == h %}
+                        <input type="hidden" name="rdv_id" value="{{ rdv_temp.id }}">
+                      {% endif %}
+                    {% endfor %}
+                    <input type="hidden" name="exercice_id" value="{{ exercice_selectionne.id }}">
+                    <input type="hidden" name="date" value="{{ date_selectionnee }}">
+                    <input type="hidden" name="mois" value="{{ month }}">
+                    <input type="hidden" name="annee" value="{{ year }}">
+                    <button 
+                      type="submit"
+                      class="w-full py-3 min-h-[60px] border border-black bg-black text-white rounded hover:bg-gray-800 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                      {{ h }}
+                    </button>
+                  </form>
+                {% else %}
+                  <!-- Créneau disponible : fond blanc, texte noir, permet d'ajouter -->
+                  <form method="post" action="{% url 'coach:ajouter_creneau' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="exercice_id" value="{{ exercice_selectionne.id }}">
+                    <input type="hidden" name="date" value="{{ date_selectionnee }}">
+                    <button 
+                      type="submit"
+                      name="heure"
+                      value="{{ h }}"
+                      class="w-full py-3 min-h-[60px] border border-gray-300 bg-white text-black rounded hover:bg-gray-100 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                      {{ h }}
+                    </button>
+                  </form>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </form>
+        {% else %}
+          <!-- Formulaire de création -->
+          <div class="grid grid-cols-4 gap-2 mb-6">
+            {% for h in heures_disponibles %}
+              {% if date_selectionnee == today|stringformat:"Y-m-d" and h < heure_limite %}
+                <button type="button" class="w-full py-3 min-h-[60px] border border-gray-200 bg-gray-100 text-gray-400 rounded cursor-not-allowed" disabled>{{ h }}</button>
+              {% elif h in creneaux_reserves %}
+                <button type="button" class="w-full py-3 min-h-[60px] border border-gray-300 bg-gray-200 text-gray-600 rounded cursor-not-allowed font-medium" disabled>
+                  {{ h }}
+                  <div class="text-xs text-gray-500 mt-1">Réservé</div>
+                </button>
+              {% elif h in heures_selectionnees %}
+                <!-- Créneau déjà sélectionné : fond noir, texte blanc, permet de supprimer -->
+                <form method="post" action="{% url 'coach:supprimer_creneau' %}">
+                  {% csrf_token %}
+                  {% for rdv_temp in rdv_temp_date %}
+                    {% if rdv_temp.heure == h %}
+                      <input type="hidden" name="rdv_id" value="{{ rdv_temp.id }}">
+                    {% endif %}
+                  {% endfor %}
+                  <input type="hidden" name="exercice_id" value="{{ exercice_selectionne.id }}">
+                  <input type="hidden" name="date" value="{{ date_selectionnee }}">
+                  <input type="hidden" name="mois" value="{{ month }}">
+                  <input type="hidden" name="annee" value="{{ year }}">
+                  <button 
+                    type="submit"
+                    class="w-full py-3 min-h-[60px] border border-black bg-black text-white rounded hover:bg-gray-800 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                    {{ h }}
+                  </button>
+                </form>
+              {% else %}
+                <!-- Créneau disponible : fond blanc, texte noir, permet d'ajouter -->
+                <form method="post" action="{% url 'coach:ajouter_creneau' %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="exercice_id" value="{{ exercice_selectionne.id }}">
+                  <input type="hidden" name="date" value="{{ date_selectionnee }}">
+                  <button 
+                    type="submit"
+                    name="heure"
+                    value="{{ h }}"
+                    class="w-full py-3 min-h-[60px] border border-gray-300 bg-white text-black rounded hover:bg-gray-100 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                    {{ h }}
+                  </button>
+                </form>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
       </div>
     {% endif %}
 
-    <!-- Notifications -->
-    <div id="notification" class="fixed top-4 right-4 z-50 hidden">
-      <div class="bg-white border-l-4 p-4 shadow-lg rounded-r-lg max-w-sm">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <svg id="notification-icon" class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-            </svg>
-          </div>
-          <div class="ml-3">
-            <p id="notification-message" class="text-sm font-medium text-gray-900"></p>
-          </div>
-          <div class="ml-auto pl-3">
-            <button onclick="hideNotification()" class="text-gray-400 hover:text-gray-600">
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
+    <!-- Affichage des RDV temporaires actuels -->
+    {% if rdv_temporaires %}
+      <div class="mt-8 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+        <h3 class="text-lg font-semibold text-orange-800 mb-3">Récapitulatif de votre réservation :</h3>
+        <div class="space-y-2 mb-4">
+          {% for rdv_temp in rdv_temporaires %}
+            <div class="flex justify-between items-center p-2 bg-white rounded border">
+              <span>{{ rdv_temp.exercice.nom }} - {{ rdv_temp.date|date:"d/m/Y" }} à {{ rdv_temp.heure }}</span>
+              <div class="flex items-center gap-2">
+                <span class="font-semibold text-gray-900">{{ rdv_temp.tarif }}€</span>
+                              <form method="post" action="{% url 'coach:supprimer_creneau' %}" class="inline">
+                {% csrf_token %}
+                <input type="hidden" name="rdv_id" value="{{ rdv_temp.id }}">
+                <input type="hidden" name="exercice_id" value="{{ exercice_selectionne.id }}">
+                <input type="hidden" name="date" value="{{ date_selectionnee }}">
+                <input type="hidden" name="mois" value="{{ month }}">
+                <input type="hidden" name="annee" value="{{ year }}">
+                <button type="submit" class="text-red-600 hover:text-red-800 px-2 py-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </form>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        
+        <!-- Total -->
+        <div class="border-t pt-4 mb-4">
+          <div class="flex justify-between items-center text-lg font-bold">
+            <span>Total :</span>
+            <span class="text-orange-800">{{ total_temporaire }}€</span>
           </div>
         </div>
+        
+        <div class="flex gap-4">
+          <form method="post" action="{% url 'coach:valider_reservation' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 font-medium">
+              Valider la réservation
+            </button>
+          </form>
+          <form method="post" action="{% url 'coach:vider_reservation' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 font-medium">
+              Vider tout
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
-
-    <!-- Étape 3 : Récapitulatif des créneaux sélectionnés -->
-    <div id="recapitulatif" class="mt-8 hidden">
-      <h3 class="text-lg font-semibold text-gray-800 mb-4">Récapitulatif de votre réservation</h3>
-      <div id="creneaux-list" class="space-y-2 mb-4">
-        <!-- Les créneaux seront ajoutés ici dynamiquement -->
-      </div>
-      <div class="border-t pt-4">
-        <p class="text-lg font-bold text-gray-800">Total : <span id="total-tarif" class="text-black">0€</span></p>
-      </div>
-      <div class="mt-6 flex gap-4">
-        <button 
-          onclick="validerReservation()"
-          class="flex-1 bg-green-600 text-white py-3 font-semibold rounded transition hover:bg-green-700">
-          Valider la réservation
-        </button>
-        <button 
-          onclick="viderReservation()"
-          class="px-6 py-3 bg-red-600 text-white font-semibold rounded transition hover:bg-red-700">
-          Vider
-        </button>
-      </div>
-    </div>
+    {% endif %}
   {% endif %}
 </div>
-
-<script>
-let creneauxSelectionnes = [];
-let creneauxIds = {}; // Pour stocker les IDs des créneaux ajoutés
-
-function showNotification(message, type = 'success') {
-    const notification = document.getElementById('notification');
-    const messageEl = document.getElementById('notification-message');
-    const icon = document.getElementById('notification-icon');
-    
-    messageEl.textContent = message;
-    
-    // Changer la couleur selon le type
-    if (type === 'success') {
-        notification.querySelector('.border-l-4').classList.remove('border-red-500', 'border-yellow-500');
-        notification.querySelector('.border-l-4').classList.add('border-green-500');
-        icon.innerHTML = '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>';
-    } else if (type === 'error') {
-        notification.querySelector('.border-l-4').classList.remove('border-green-500', 'border-yellow-500');
-        notification.querySelector('.border-l-4').classList.add('border-red-500');
-        icon.innerHTML = '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm4.707-4.707a1 1 0 00-1.414-1.414L10 12.586l-1.293-1.293a1 1 0 00-1.414 1.414L8.586 14l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l1.293 1.293a1 1 0 001.414-1.414L11.414 14l1.293-1.293a1 1 0 000-1.414z" clip-rule="evenodd"></path>';
-    } else if (type === 'warning') {
-        notification.querySelector('.border-l-4').classList.remove('border-green-500', 'border-red-500');
-        notification.querySelector('.border-l-4').classList.add('border-yellow-500');
-        icon.innerHTML = '<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>';
-    }
-    
-    notification.classList.remove('hidden');
-    
-    // Auto-hide après 4 secondes
-    setTimeout(() => {
-        hideNotification();
-    }, 4000);
-}
-
-function hideNotification() {
-    document.getElementById('notification').classList.add('hidden');
-}
-
-function toggleCreneau(exerciceId, date, heure) {
-    const creneauKey = `${date}-${heure}`;
-    const button = document.getElementById(`creneau-${heure}`);
-    
-    // Vérifier si le créneau est déjà sélectionné
-    if (creneauxIds[creneauKey]) {
-        // Supprimer le créneau
-        supprimerCreneau(creneauxIds[creneauKey], exerciceId, date, heure);
-    } else {
-        // Ajouter le créneau
-        ajouterCreneau(exerciceId, date, heure);
-    }
-}
-
-function ajouterCreneau(exerciceId, date, heure) {
-    fetch('{% url "coach:ajouter_creneau" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        },
-        body: JSON.stringify({
-            exercice_id: exerciceId,
-            date: date,
-            heure: heure
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Ajouter le créneau à la liste
-            const creneau = {
-                id: data.rdv_id || Date.now(), // Utiliser l'ID retourné par le serveur
-                exercice: '{{ exercice_selectionne.nom }}',
-                date: date,
-                heure: heure,
-                tarif: {{ exercice_selectionne.tarif }}
-            };
-            creneauxSelectionnes.push(creneau);
-            
-            // Stocker l'ID du créneau
-            const creneauKey = `${date}-${heure}`;
-            creneauxIds[creneauKey] = creneau.id;
-            
-            // Mettre à jour l'apparence du bouton
-            const button = document.getElementById(`creneau-${heure}`);
-            button.classList.remove('bg-white', 'text-black', 'hover:bg-gray-100');
-            button.classList.add('bg-black', 'text-white', 'border-black');
-            
-            afficherRecapitulatif();
-            showNotification(data.message, 'success');
-        } else {
-            showNotification(data.message, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        showNotification('Erreur lors de l\'ajout du créneau', 'error');
-    });
-}
-
-function supprimerCreneau(rdvId, exerciceId, date, heure) {
-    fetch('{% url "coach:supprimer_creneau" %}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        },
-        body: JSON.stringify({
-            rdv_id: rdvId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Retirer le créneau de la liste
-            creneauxSelectionnes = creneauxSelectionnes.filter(c => c.id !== rdvId);
-            
-            // Retirer l'ID du créneau
-            const creneauKey = `${date}-${heure}`;
-            delete creneauxIds[creneauKey];
-            
-            // Mettre à jour l'apparence du bouton
-            const button = document.getElementById(`creneau-${heure}`);
-            button.classList.remove('bg-black', 'text-white', 'border-black');
-            button.classList.add('bg-white', 'text-black', 'hover:bg-gray-100');
-            
-            afficherRecapitulatif();
-            showNotification(data.message, 'success');
-        } else {
-            showNotification(data.message, 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        showNotification('Erreur lors de la suppression du créneau', 'error');
-    });
-}
-
-function afficherRecapitulatif() {
-    const recapitulatif = document.getElementById('recapitulatif');
-    const creneauxList = document.getElementById('creneaux-list');
-    const totalTarif = document.getElementById('total-tarif');
-    
-    if (creneauxSelectionnes.length > 0) {
-        recapitulatif.classList.remove('hidden');
-        
-        creneauxList.innerHTML = '';
-        let total = 0;
-        
-        creneauxSelectionnes.forEach(creneau => {
-            const creneauElement = document.createElement('div');
-            creneauElement.className = 'flex justify-between items-center p-3 bg-gray-50 rounded border';
-            creneauElement.innerHTML = `
-                <div>
-                    <span class="font-medium">${creneau.exercice}</span>
-                    <span class="text-gray-600 ml-2">${creneau.date} à ${creneau.heure}h00</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="font-semibold text-black">${creneau.tarif}€</span>
-                    <button onclick="supprimerCreneau(${creneau.id}, '{{ exercice_selectionne.id }}', '${creneau.date}', ${creneau.heure})" class="text-red-600 hover:text-red-800">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-            `;
-            creneauxList.appendChild(creneauElement);
-            total += creneau.tarif;
-        });
-        
-        totalTarif.textContent = total + '€';
-    } else {
-        recapitulatif.classList.add('hidden');
-    }
-}
-
-function validerReservation() {
-    if (creneauxSelectionnes.length === 0) {
-        showNotification('Aucun créneau sélectionné', 'warning');
-        return;
-    }
-    
-    fetch('{% url "coach:valider_reservation" %}', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            window.location.href = '{% url "coach:votre_rendez_vous" %}';
-        } else {
-            showNotification('Erreur lors de la validation', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        showNotification('Erreur lors de la validation', 'error');
-    });
-}
-
-function viderReservation() {
-    // Supprimer tous les créneaux du serveur
-    const promises = creneauxSelectionnes.map(creneau => {
-        const creneauKey = `${creneau.date}-${creneau.heure}`;
-        return supprimerCreneau(creneau.id, '{{ exercice_selectionne.id }}', creneau.date, creneau.heure);
-    });
-    
-    Promise.all(promises).then(() => {
-        creneauxSelectionnes = [];
-        creneauxIds = {};
-        afficherRecapitulatif();
-        showNotification('Réservation vidée', 'success');
-    });
-}
-
-// Ajouter le token CSRF
-document.addEventListener('DOMContentLoaded', function() {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-    if (!csrfToken) {
-        const token = document.createElement('input');
-        token.type = 'hidden';
-        token.name = 'csrfmiddlewaretoken';
-        token.value = '{{ csrf_token }}';
-        document.body.appendChild(token);
-    }
-});
-</script>

@@ -19,7 +19,12 @@ def login_view(request):
         if user is not None:
             login(request, user)
             messages.success(request, f'Bienvenue {user.username}')
-            return redirect('coach:accueil')
+            
+            # Rediriger les coaches vers leur dashboard
+            if hasattr(user, 'profile') and user.profile.is_coach:
+                return redirect('coach:coach_dashboard')
+            else:
+                return redirect('coach:accueil')
         else:
             messages.error(request, 'Identifiants invalides.')
 
