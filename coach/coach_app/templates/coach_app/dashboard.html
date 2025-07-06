@@ -1,0 +1,11 @@
+{% extends "coach_app/base.html" %}
+{% block content %}
+<div class="max-w-4 xl o px-4 py-8">
+  <div class="bg-white shadow-lg border border-gray-200 rounded-lg p-6">
+    {% include "coach_app/components/votre_rendez_vous.html" %}
+  </div>
+  <div class="mt-8 bg-white shadow-lg border border-gray-200 rounded-lg p-6">
+    {% include "coach_app/components/change_password.html" %}
+  </div>
+</div>
+{% endblock %}

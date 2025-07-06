@@ -1,0 +1,58 @@
+{% load static %}
+
+<header class="bg-white shadow">
+  <div class="w-full px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-3 items-center h-16">
+
+      <div class="flex items-center">
+        <a href="{% url 'coach:votre_rendez_vous' %}">
+          <img class="h-8 w-auto" src="{% static 'images/coach.png' %}" alt="Logo">
+        </a>
+        <h1 class="text-2xl font-bold text-gray-800 ml-2">Coach Alex Moreira</h1>
+      </div>
+
+      <nav class="flex justify-center space-x-8 items-center">
+        <a href="{% url 'coach:accueil' %}"
+           class="px-3 py-2 rounded transition
+                  {% if request.resolver_match.url_name == 'accueil' %}bg-black text-white{% else %}text-black hover:bg-gray-800 hover:text-white{% endif %}">
+          Accueil
+        </a>
+
+        <a href="{% url 'coach:rendez_vous' %}"
+           class="px-3 py-2 rounded transition
+                  {% if request.resolver_match.url_name == 'rendez_vous' %}bg-black text-white{% else %}text-black hover:bg-gray-800 hover:text-white{% endif %}">
+          Rendez-vous
+        </a>
+
+        <a href="{% url 'coach:a_propos' %}"
+           class="px-3 py-2 rounded transition
+                  {% if request.resolver_match.url_name == 'a_propos' %}bg-black text-white{% else %}text-black hover:bg-gray-800 hover:text-white{% endif %}">
+          À propos
+        </a>
+
+        <a href="{% url 'coach:contact' %}"
+           class="px-3 py-2 rounded transition
+                  {% if request.resolver_match.url_name == 'contact' %}bg-black text-white{% else %}text-black hover:bg-gray-800 hover:text-white{% endif %}">
+          Contact
+        </a>
+      </nav>
+      <div class="flex justify-end items-center space-x-4">
+        {% if request.user.is_authenticated %}
+          <a href="{% url 'coach:votre_rendez_vous' %}" class="text-sm text-gray-700 hover:text-gray-900 transition">
+            👤 {{ request.user.username }}
+          </a>
+          <a href="{% url 'logout' %}"
+             class="px-3 py-2 rounded text-red-600 hover:bg-red-100 hover:text-red-800 transition">
+            Logout
+          </a>
+        {% else %}
+          <a href="{% url 'login' %}"
+             class="px-3 py-2 rounded text-blue-600 hover:bg-blue-100 hover:text-blue-800 transition">
+            Login
+          </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</header>

@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Accueil - Coach Sportif Miami</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+  {% include "coach_app/components/header.html" %}
+
+  <main class="max-w-7xl mx-auto mt-10 bg-white p-6 rounded shadow">
+
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+      <div class="w-full">
+        <img src="{% static 'images/alex.png' %}" alt="Alex Moreira, coach sportif à Miami" class="w-full rounded-lg shadow-md object-cover">
+      </div>
+      <div class="md:pl-8">
+        <h2 class="text-3xl font-extrabold text-gray-900 mb-6 uppercase">À propos de moi</h2>
+
+        <p class="text-lg text-gray-700 leading-relaxed mb-4">
+          Je m'appelle Alex Moreira, coach sportif certifié depuis plus de <span class="font-semibold">10 ans</span> ici à Miami. Mon métier : transformer des corps, mais aussi des esprits.
+          J'allie <span class="font-semibold">discipline</span>, <span class="font-semibold">encadrement sur-mesure</span> et <span class="font-semibold">énergie communicative</span> pour te permettre d'obtenir des résultats visibles et durables.
+        </p>
+
+        <p class="text-lg text-gray-700 leading-relaxed mb-4">
+          Mes méthodes sont adaptées à chaque profil : perte de poids, prise de muscle, tonicité, posture, mobilité ou préparation physique.
+          Ensemble, on bâtit ton plan d'action autour de ton rythme, ton corps, et surtout ton objectif — avec intensité, stratégie et motivation.
+        </p>
+
+        <p class="text-lg text-gray-700 leading-relaxed mb-4">
+          J'ai eu l'honneur de coacher <span class="font-semibold">Lady Gaga</span> sur l'endurance cardio et la fluidité corporelle avant ses concerts,
+          <span class="font-semibold">Beyoncé</span> pour ses chorégraphies intenses via un travail du tronc et des hanches,
+          <span class="font-semibold">Vanessa Paradis</span> sur la posture et la respiration pour ses prestations scéniques.
+          <span class="font-semibold">Johnny Depp</span> m'a fait confiance pour renforcer sa mobilité articulaire et son gainage avant des rôles physiques.
+          Côté cinéma et action, j'ai accompagné <span class="font-semibold">Chris Evans</span>, <span class="font-semibold">Zac Efron</span>, <span class="font-semibold">Arnold Schwarzenegger</span> et <span class="font-semibold">Sylvester Stallone</span>
+          avec des protocoles de puissance, d'endurance musculaire et de souplesse.
+          Les <span class="font-semibold">Kardashian</span> — Kendall, Kourtney et Khloé — ont quant à elles suivi mes plans personnalisés pour la tonicité du bas du corps et la définition ciblée.
+        </p>
+
+        <p class="text-lg text-gray-700 leading-relaxed mb-4">
+          Ce que je t'apporte, c'est plus qu'un coaching : c'est un partenariat.
+          Je suis là pour te guider, te challenger, t'encourager — séance après séance.
+          Résultat : un corps performant, une posture affirmée, une énergie retrouvée.
+        </p>
+
+        <div class="mt-6 bg-yellow-100 text-yellow-900 p-4 rounded-lg text-center text-xl font-bold shadow-md">
+          Résultats garantis — Programme intensif avec évolution dès la 3<sup>e</sup> semaine
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-12">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6">Mes services</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 shadow hover:shadow-lg transition">
+          <h3 class="text-xl font-semibold text-blue-500 mb-2">Séance sur mesure</h3>
+          <p class="text-gray-700 mb-2">Renforcement musculaire, cardio et mobilité ciblée selon tes besoins.</p>
+          <ul class="list-disc text-sm text-gray-600 mb-2 pl-5">
+            <li>Durée : 60 minutes</li>
+            <li>Suivi personnalisé et plan post-séance</li>
+          </ul>
+          <p class="text-gray-800 font-semibold">Tarif : 60€</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 shadow hover:shadow-lg transition">
+          <h3 class="text-xl font-semibold text-blue-500 mb-2">Pack transformation 4 semaines</h3>
+          <p class="text-gray-700 mb-2">Résultats visibles dès la 2<sup>e</sup> semaine avec un plan complet.</p>
+          <ul class="list-disc text-sm text-gray-600 mb-2 pl-5">
+            <li>4 séances/semaine</li>
+            <li>Bilan initial + plan nutrition</li>
+            <li>Suivi et ajustement chaque semaine</li>
+          </ul>
+          <p class="text-gray-800 font-semibold">Tarif : 220€</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 shadow hover:shadow-lg transition">
+          <h3 class="text-xl font-semibold text-blue-500 mb-2">Suivi nutritionnel</h3>
+          <p class="text-gray-700 mb-2">Alimentation adaptée à ton corps, ton rythme et tes objectifs.</p>
+          <ul class="list-disc text-sm text-gray-600 mb-2 pl-5">
+            <li>Consultation + bilan hebdomadaire</li>
+            <li>Plan nutrition personnalisé et évolutif</li>
+          </ul>
+          <p class="text-gray-800 font-semibold">Tarif : 90€</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 shadow hover:shadow-lg transition">
+          <h3 class="text-xl font-semibold text-blue-500 mb-2">Pilates Power</h3>
+          <p class="text-gray-700 mb-2">Inspiré des studios de Miami Beach, pour posture, équilibre et contrôle corporel.</p>
+          <ul class="list-disc text-sm text-gray-600 mb-2 pl-5">
+            <li>Travail du centre (core)</li>
+            <li>Mobilité et tonus global</li>
+          </ul>
+          <p class="text-gray-800 font-semibold">Tarif : 50€</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 shadow hover:shadow-lg transition">
+          <h3 class="text-xl font-semibold text-blue-500 mb-2">HIIT Performance</h3>
+          <p class="text-gray-700 mb-2">Entraînement haute intensité comme pratiqué par les stars.</p>
+          <ul class="list-disc text-sm text-gray-600 mb-2 pl-5">
+            <li>Circuits explosifs à haute fréquence</li>
+            <li>Brûle-graisses et gain de puissance</li>
+          </ul>
+          <p class="text-gray-800 font-semibold">Tarif : 70€</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 shadow hover:shadow-lg transition">
+          <h3 class="text-xl font-semibold text-blue-500 mb-2">Bootcamp plage</h3>
+          <p class="text-gray-700 mb-2">Cardio, renfo et fun, les pieds dans le sable de Miami.</p>
+          <ul class="list-disc text-sm text-gray-600 mb-2 pl-5">
+            <li>Tyres, cordes, medicine balls</li>
+            <li>Entraînement fonctionnel complet</li>
+          </ul>
+          <p class="text-gray-800 font-semibold">Tarif : 65€</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 shadow hover:shadow-lg transition">
+          <h3 class="text-xl font-semibold text-blue-500 mb-2">Boxe & Coordination</h3>
+          <p class="text-gray-700 mb-2">Travail de la précision, du cardio et de la posture avec des techniques de boxe.</p>
+          <ul class="list-disc text-sm text-gray-600 mb-2 pl-5">
+            <li>Gants, sac et shadow boxing</li>
+            <li>Amélioration du rythme et de la réactivité</li>
+          </ul>
+          <p class="text-gray-800 font-semibold">Tarif : 55€</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 shadow hover:shadow-lg transition">
+          <h3 class="text-xl font-semibold text-blue-500 mb-2">Altitude Training</h3>
+          <p class="text-gray-700 mb-2">Entraînement simulé en haute altitude pour booster ton endurance.</p>
+          <ul class="list-disc text-sm text-gray-600 mb-2 pl-5">
+            <li>Sessions à oxygène réduit</li>
+            <li>Amélioration cardio-respiratoire</li>
+          </ul>
+          <p class="text-gray-800 font-semibold">Tarif : 80€</p>
+        </div>
+
+        <div class="bg-gray-50 rounded-lg border border-gray-200 p-6 shadow hover:shadow-lg transition">
+          <h3 class="text-xl font-semibold text-blue-500 mb-2">Stretch & Recovery</h3>
+          <p class="text-gray-700 mb-2">Séance dédiée à la récupération musculaire et à la mobilité articulaire.</p>
+          <ul class="list-disc text-sm text-gray-600 mb-2 pl-5">
+            <li>Étirements profonds</li>
+            <li>Massage gun & respiration guidée</li>
+          </ul>
+          <p class="text-gray-800 font-semibold">Tarif : 45€</p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  {% include "coach_app/components/footer.html" %}
+
+</body>
+</html>

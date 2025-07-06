@@ -1,0 +1,72 @@
+<h2 class="text-2xl font-bold text-center text-gray-800 mb-4">
+  Vos rendez-vous avec votre coach sportif
+</h2>
+
+{% if session_actuelle %}
+  <div class="mb-6 p-4 rounded-lg">
+    <p class="text-center text-lg font-semibold text-gray-800">
+      Total de votre réservation : <span class="text-2xl text-gray-900">{{ total_tarif }}€</span>
+    </p>
+  </div>
+
+  {% if rendez_vous_list %}
+    <div class="space-y-4 mb-6">
+      {% for rdv in rendez_vous_list %}
+        <div class="flex justify-between items-center p-4 rounded-lg border border-gray-200">
+          <div class="flex-1">
+            <p class="font-semibold text-gray-800">{{ rdv.exercice }}</p>
+            <p class="text-gray-600">{{ rdv.jour }} à {{ rdv.heure }}</p>
+            {% if rdv.duree %}
+              <p class="text-sm text-gray-500">Durée : {{ rdv.duree }}</p>
+            {% endif %}
+          </div>
+          <div class="flex items-center gap-3">
+            <p class="font-bold text-gray-900 text-lg">{{ rdv.tarif }}€</p>
+            <div class="flex gap-2">
+              <form method="post" action="{% url 'coach:modifier_rendez_vous' rdv.id %}" class="inline">
+                {% csrf_token %}
+                <button
+                  type="submit"
+                  class="px-4 py-2 bg-black text-white text-sm rounded-lg hover:bg-gray-800 transition-colors duration-200 font-medium shadow-sm">
+                  Modifier
+                </button>
+              </form>
+              <form method="post" action="{% url 'coach:supprimer_rendez_vous' rdv.id %}" class="inline">
+                {% csrf_token %}
+                <button
+                  type="submit"
+                  class="px-4 py-2 bg-gray-700 text-black border border-black text-sm rounded-lg hover:bg-gray-600 transition-colors duration-200 font-medium shadow-sm">
+                  Supprimer
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="mt-6 flex justify-center gap-4 flex-wrap">
+      <a href="{% url 'coach:rendez_vous' %}" class="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium transition-colors duration-200 shadow-sm">
+        Ajouter un rendez-vous
+      </a>
+      <form method="post" action="{% url 'coach:supprimer_tous_rendez_vous' %}" class="inline">
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="px-6 py-3 bg-red-700 text-black rounded-lg border border-red-800 hover:bg-red-800 font-semibold transition-colors duration-200 shadow-lg">
+          Supprimer tous
+        </button>
+      </form>
+    </div>
+  {% else %}
+    <p class="text-center text-gray-600">Aucun rendez-vous dans cette session.</p>
+  {% endif %}
+{% else %}
+  {% if message %}
+    <p class="text-center text-gray-600">{{ message }}</p>
+  {% elif erreur %}
+    <p class="text-center text-red-600">{{ erreur }}</p>
+  {% else %}
+    <p class="text-center text-gray-600">Aucun rendez-vous n'est encore enregistré.</p>
+  {% endif %}
+{% endif %}
