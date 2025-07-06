@@ -1,0 +1,10 @@
+Django
+django-tailwind
+tailwindcss
+postcss
+postcss-cli
+postcss-nested
+postcss-simple-vars
+@tailwindcss/postcss
+cross-env
+rimraf 
