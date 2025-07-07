@@ -6,17 +6,14 @@ from .models import Profile, Exercice, RendezVous, RDVTemporaire, NoteHistorique
 
 
 class ProfileService:
-    """Service pour la gestion des profils utilisateurs"""
     
     @staticmethod
     def get_or_create_profile(user):
-        """Récupère ou crée un profil pour un utilisateur"""
         profile, created = Profile.objects.get_or_create(user=user)
         return profile, created
     
     @staticmethod
     def is_coach(user):
-        """Vérifie si un utilisateur est un coach"""
         try:
             return user.profile.is_coach
         except Profile.DoesNotExist:
@@ -24,11 +21,8 @@ class ProfileService:
 
 
 class AppointmentService:
-    """Service pour la gestion des rendez-vous"""
-    
     @staticmethod
     def create_temporary_appointment(user, exercice, date, heure):
-        """Crée un rendez-vous temporaire"""
         rdv_temp = RDVTemporaire.objects.create(
             user=user,
             exercice=exercice,
@@ -41,7 +35,6 @@ class AppointmentService:
     
     @staticmethod
     def create_definitive_appointment(user, exercice, date, heure, duree=60, tarif=50):
-        """Crée un rendez-vous définitif"""
         rdv = RendezVous.objects.create(
             user=user,
             exercice=exercice,
@@ -54,7 +47,6 @@ class AppointmentService:
     
     @staticmethod
     def update_appointment(rdv_id, exercice, date, heure, duree=60, tarif=50):
-        """Met à jour un rendez-vous existant"""
         rdv = get_object_or_404(RendezVous, id=rdv_id)
         rdv.exercice = exercice
         rdv.date = date
@@ -66,34 +58,28 @@ class AppointmentService:
     
     @staticmethod
     def delete_appointment(rdv_id):
-        """Supprime un rendez-vous"""
         rdv = get_object_or_404(RendezVous, id=rdv_id)
         rdv.delete()
     
     @staticmethod
     def delete_temporary_appointment(rdv_temp_id):
-        """Supprime un rendez-vous temporaire"""
         rdv_temp = get_object_or_404(RDVTemporaire, id=rdv_temp_id)
         rdv_temp.delete()
     
     @staticmethod
     def get_user_appointments(user):
-        """Récupère tous les rendez-vous d'un utilisateur"""
         return RendezVous.objects.filter(user=user).order_by('date', 'heure')
     
     @staticmethod
     def get_user_temporary_appointments(user):
-        """Récupère tous les rendez-vous temporaires d'un utilisateur"""
         return RDVTemporaire.objects.filter(user=user).order_by('date', 'heure')
     
     @staticmethod
     def get_pending_appointments():
-        """Récupère tous les rendez-vous en attente de validation"""
         return RendezVous.objects.filter(statut='en_attente').order_by('date', 'heure')
     
     @staticmethod
     def get_appointment_history(user):
-        """Récupère l'historique des rendez-vous (acceptés/refusés)"""
         return RendezVous.objects.filter(
             user=user,
             statut__in=['valide', 'refuse', 'termine']
@@ -101,21 +87,17 @@ class AppointmentService:
 
 
 class CoachService:
-    """Service pour les fonctionnalités spécifiques aux coaches"""
     
     @staticmethod
     def get_coach_clients():
-        """Récupère tous les clients (utilisateurs non-coaches)"""
         return User.objects.filter(profile__is_coach=False)
     
     @staticmethod
     def get_client_appointments(client):
-        """Récupère tous les rendez-vous d'un client spécifique"""
         return RendezVous.objects.filter(user=client).order_by('-date', '-heure')
     
     @staticmethod
     def validate_appointment(rdv_id, statut, note_privee=None):
-        """Valide ou refuse un rendez-vous"""
         rdv = get_object_or_404(RendezVous, id=rdv_id)
         rdv.statut = statut
         rdv.save()
@@ -136,6 +118,8 @@ class CoachService:
             rendez_vous=rdv,
             contenu=note
         )
+        rdv.notes_personnelles = note
+        rdv.save()
         return rdv
 
 
@@ -239,13 +223,13 @@ class SessionService:
 
 
 class ConflictService:
-    """Service pour la gestion des conflits de créneaux"""
-    
+
+
     @staticmethod
     def check_definitive_conflicts(date, heure, exclude_user=None, exclude_rdv_id=None):
         """Vérifie les conflits avec les rendez-vous définitifs"""
         query = RendezVous.objects.filter(date=date, heure=heure)
-        
+
         if exclude_user:
             query = query.exclude(user=exclude_user)
         

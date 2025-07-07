@@ -177,19 +177,15 @@ def ajouter_creneau(request):
         exercice_id = request.POST.get('exercice_id')
         date_str = request.POST.get('date')
         heure = request.POST.get('heure')
-        rdv_id = request.POST.get('rdv_id')  # ID du RDV définitif à modifier (optionnel)
+        rdv_id = request.POST.get('rdv_id')
         
         try:
             exercice = ExerciseService.get_exercise_by_id(exercice_id)
             date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
-            
-            # Si c'est une modification d'un RDV définitif
             if rdv_id:
                 try:
-                    # Récupérer le RDV à modifier
                     rdv = RendezVous.objects.get(id=rdv_id, user=request.user)
-                    
-                    # Vérifier les conflits avec le service
+
                     conflit_def = ConflictService.check_definitive_conflicts(date_obj, heure, exclude_user=request.user, exclude_rdv_id=rdv_id)
                     
                     if conflit_def:
@@ -346,8 +342,7 @@ def votre_rendez_vous(request):
                 "tarif": rdv.tarif,
                 "temporaire": False
             })
-    
-    # Formater les RDV temporaires
+
     rdv_temporaires_formatted = []
     for rdv_temp in rdv_temporaires:
         import locale
@@ -398,14 +393,12 @@ def votre_rendez_vous(request):
 def supprimer_rendez_vous(request, rdv_id):
     if request.method == 'POST':
         try:
-            # Essayer de supprimer un RDV temporaire d'abord
             rdv_temp = RDVTemporaire.objects.get(id=rdv_id, user=request.user)
             rdv_temp.delete()
             messages.success(request, "Rendez-vous temporaire supprimé avec succès.")
             return redirect('coach:votre_rendez_vous')
             
         except RDVTemporaire.DoesNotExist:
-            # Si ce n'est pas un RDV temporaire, essayer un RDV définitif
             try:
                 rdv = RendezVous.objects.get(id=rdv_id, user=request.user)
                 session = rdv.session
@@ -479,9 +472,6 @@ def vider_reservation(request):
     
     return redirect('coach:rendez_vous')
 
-
-# ===== VUES COACH =====
-
 def coach_required(view_func):
     """Décorateur pour vérifier que l'utilisateur est un coach"""
     def wrapper(request, *args, **kwargs):
@@ -497,7 +487,6 @@ def coach_required(view_func):
 @login_required
 @coach_required
 def coach_dashboard(request):
-    """Dashboard principal du coach - tous les rendez-vous"""
     from datetime import date
     
     # Rendez-vous en attente de validation

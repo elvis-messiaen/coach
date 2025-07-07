@@ -53,6 +53,8 @@
       {% endfor %}
     </div>
 
+    <!-- DEBUG : Affichage brute de date_selectionnee avant la grille du calendrier -->
+    <!-- supprimé -->
     <div class="grid grid-cols-7 gap-2 text-center">
       {% for _ in range_precalé %}
         <div></div>
@@ -61,13 +63,22 @@
       {% for jour in jours_du_mois %}
         {% if jour.disable %}
           <button class="py-2 border border-gray-200 bg-gray-100 text-gray-400 rounded cursor-not-allowed" disabled>{{ jour.numero }}</button>
+        {% elif date_selectionnee and jour.date|date:'Y-m-d' == date_selectionnee %}
+          <a href="?exercice={{ exercice_selectionne.id }}&mois={{ month }}&annee={{ year }}&date={{ jour.date|date:'Y-m-d' }}{% if mode_modification and rdv_id %}&rdv_id={{ rdv_id }}&modifier=true{% endif %}"
+             class="cursor-pointer bg-black text-white border-2 border-black rounded-xl block py-2 text-center">
+            {{ jour.numero }}
+          </a>
         {% else %}
-          <a href="?exercice={{ exercice_selectionne.id }}&mois={{ month }}&annee={{ year }}&date={{ jour.date|date:'Y-m-d' }}{% if mode_modification and rdv_id %}&rdv_id={{ rdv_id }}&modifier=true{% endif %}" class="block py-2 border border-gray-300 bg-white text-gray-800 rounded hover:bg-gray-100">
+          <a href="?exercice={{ exercice_selectionne.id }}&mois={{ month }}&annee={{ year }}&date={{ jour.date|date:'Y-m-d' }}{% if mode_modification and rdv_id %}&rdv_id={{ rdv_id }}&modifier=true{% endif %}"
+             class="block py-2 border border-gray-300 bg-white text-gray-800 rounded hover:bg-gray-100 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
             {{ jour.numero }}
           </a>
         {% endif %}
       {% endfor %}
     </div>
+
+    <!-- DEBUG : Affichage de la date sélectionnée -->
+    <!-- supprimé -->
 
     {% if date_selectionnee %}
       <div class="mt-8">
@@ -109,6 +120,9 @@
                     <input type="hidden" name="date" value="{{ date_selectionnee }}">
                     <input type="hidden" name="mois" value="{{ month }}">
                     <input type="hidden" name="annee" value="{{ year }}">
+                    {% if mode_modification and rdv_id %}
+                      <input type="hidden" name="rdv_id" value="{{ rdv_id }}">
+                    {% endif %}
                     <button 
                       type="submit"
                       class="w-full py-3 min-h-[60px] border border-black bg-black text-white rounded hover:bg-gray-800 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
@@ -121,6 +135,9 @@
                     {% csrf_token %}
                     <input type="hidden" name="exercice_id" value="{{ exercice_selectionne.id }}">
                     <input type="hidden" name="date" value="{{ date_selectionnee }}">
+                    {% if mode_modification and rdv_id %}
+                      <input type="hidden" name="rdv_id" value="{{ rdv_id }}">
+                    {% endif %}
                     <button 
                       type="submit"
                       name="heure"
@@ -144,41 +161,48 @@
                   {{ h }}
                   <div class="text-xs text-gray-500 mt-1">Réservé</div>
                 </button>
-              {% elif h in heures_selectionnees %}
-                <!-- Créneau déjà sélectionné : fond noir, texte blanc, permet de supprimer -->
-                <form method="post" action="{% url 'coach:supprimer_creneau' %}">
-                  {% csrf_token %}
-                  {% for rdv_temp in rdv_temp_date %}
-                    {% if rdv_temp.heure == h %}
-                      <input type="hidden" name="rdv_id" value="{{ rdv_temp.id }}">
+                {% elif h in heures_selectionnees %}
+                  <!-- Créneau déjà sélectionné : fond noir, texte blanc, permet de supprimer -->
+                  <form method="post" action="{% url 'coach:supprimer_creneau' %}">
+                    {% csrf_token %}
+                    {% for rdv_temp in rdv_temp_date %}
+                      {% if rdv_temp.heure == h %}
+                        <input type="hidden" name="rdv_id" value="{{ rdv_temp.id }}">
+                      {% endif %}
+                    {% endfor %}
+                    <input type="hidden" name="exercice_id" value="{{ exercice_selectionne.id }}">
+                    <input type="hidden" name="date" value="{{ date_selectionnee }}">
+                    <input type="hidden" name="mois" value="{{ month }}">
+                    <input type="hidden" name="annee" value="{{ year }}">
+                    {% if mode_modification and rdv_id %}
+                      <input type="hidden" name="rdv_id" value="{{ rdv_id }}">
                     {% endif %}
-                  {% endfor %}
-                  <input type="hidden" name="exercice_id" value="{{ exercice_selectionne.id }}">
-                  <input type="hidden" name="date" value="{{ date_selectionnee }}">
-                  <input type="hidden" name="mois" value="{{ month }}">
-                  <input type="hidden" name="annee" value="{{ year }}">
-                  <button 
-                    type="submit"
-                    class="w-full py-3 min-h-[60px] border border-black bg-black text-white rounded hover:bg-gray-800 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                    {{ h }}
-                  </button>
-                </form>
-              {% else %}
-                <!-- Créneau disponible : fond blanc, texte noir, permet d'ajouter -->
-                <form method="post" action="{% url 'coach:ajouter_creneau' %}">
-                  {% csrf_token %}
-                  <input type="hidden" name="exercice_id" value="{{ exercice_selectionne.id }}">
-                  <input type="hidden" name="date" value="{{ date_selectionnee }}">
-                  <button 
-                    type="submit"
-                    name="heure"
-                    value="{{ h }}"
-                    class="w-full py-3 min-h-[60px] border border-gray-300 bg-white text-black rounded hover:bg-gray-100 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                    {{ h }}
-                  </button>
-                </form>
-              {% endif %}
-            {% endfor %}
+                    <button 
+                      type="submit"
+                      class="w-full py-3 min-h-[60px] border border-black bg-black text-white rounded hover:bg-gray-800 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                      {{ h }}
+                    </button>
+                  </form>
+                {% else %}
+                  <!-- Créneau disponible : fond blanc, texte noir, permet d'ajouter -->
+                  <form method="post" action="{% url 'coach:ajouter_creneau' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="exercice_id" value="{{ exercice_selectionne.id }}">
+                    <input type="hidden" name="date" value="{{ date_selectionnee }}">
+                    {% if mode_modification and rdv_id %}
+                      <input type="hidden" name="rdv_id" value="{{ rdv_id }}">
+                    {% endif %}
+                    <button 
+                      type="submit"
+                      name="heure"
+                      value="{{ h }}"
+                      class="w-full py-3 min-h-[60px] border border-gray-300 bg-white text-black rounded hover:bg-gray-100 cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                      {{ h }}
+                    </button>
+                  </form>
+                {% endif %}
+              {% endfor %}
+            </div>
           </div>
         {% endif %}
       </div>
